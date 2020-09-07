@@ -45,7 +45,7 @@ RUN cd /usr/src \
 
 ENV HAPROXY_MAJOR 2.2
 ENV HAPROXY_VERSION 2.2.2
-ENV HAPROXY_MD5 dfef423ff9f191c401d6b29e7eb9d6e2
+ENV HAPROXY_MD5 dfef423ff9f191c401d6b29e7eb9d6e2的
 
 RUN cd /root && wget https://github.com/openssl/openssl/archive/OpenSSL_1_1_0l.tar.gz \
 	&& tar -zxvf OpenSSL_1_1_0l.tar.gz \
@@ -62,7 +62,8 @@ RUN cd / && curl -SL "http://www.haproxy.org/download/${HAPROXY_MAJOR}/src/hapro
 	&& tar -xzf haproxy.tar.gz -C /usr/src/haproxy --strip-components=1 \
 	&& rm haproxy.tar.gz \
 	&& make -C /usr/src/haproxy \
-		TARGET=generic \
+		TARGET=linux-glibc \
+		ARCH=x86_64 \
 		USE_PCRE=1 PCREDIR= \
 		USE_OPENSSL=1 \
 		SSL_LIB=/usr/local/openssl-1.1.0/lib \
