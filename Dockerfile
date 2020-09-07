@@ -43,9 +43,9 @@ RUN cd /usr/src \
     && make linux \
     && make INSTALL_TOP=/opt/lua${LUA_VERSION_SHORT} install
 
-ENV HAPROXY_MAJOR 2.0
-ENV HAPROXY_VERSION 2.0.15
-ENV HAPROXY_MD5 59f892991476f08e2d16ac460c502f61
+ENV HAPROXY_MAJOR 2.2
+ENV HAPROXY_VERSION 2.2.2
+ENV HAPROXY_MD5 dfef423ff9f191c401d6b29e7eb9d6e2
 
 RUN cd /root && wget https://github.com/openssl/openssl/archive/OpenSSL_1_1_0l.tar.gz \
 	&& tar -zxvf OpenSSL_1_1_0l.tar.gz \
