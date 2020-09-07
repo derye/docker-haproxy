@@ -45,7 +45,7 @@ RUN cd /usr/src \
 
 ENV HAPROXY_MAJOR 2.2
 ENV HAPROXY_VERSION 2.2.2
-ENV HAPROXY_MD5 dfef423ff9f191c401d6b29e7eb9d6e2的
+ENV HAPROXY_MD5 dfef423ff9f191c401d6b29e7eb9d6e2
 
 RUN cd /root && wget https://github.com/openssl/openssl/archive/OpenSSL_1_1_0l.tar.gz \
 	&& tar -zxvf OpenSSL_1_1_0l.tar.gz \
