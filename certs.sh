@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
 if [ -n "$CERTS" ]; then
-    certbot-auto certonly --no-self-upgrade -n --text --standalone \
+    certbot certonly --no-self-upgrade -n --text --standalone \
         --preferred-challenges http-01 \
         -d "$CERTS" --keep --expand --agree-tos --email "$EMAIL" \
-		--server https://acme-v02.api.letsencrypt.org/directory \
+		--server "$URL" \
         || exit 1
 
     mkdir -p /usr/local/etc/haproxy/certs

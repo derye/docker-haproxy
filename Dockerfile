@@ -1,66 +1,51 @@
 # Much of this stolen from haproxy:1.6 dockerfile, with Lua support
-FROM debian:jessie
+FROM debian:buster
 
-RUN echo "deb [check-valid-until=no] http://archive.debian.org/debian jessie-backports main" > /etc/apt/sources.list.d/jessie.backports.list
-RUN echo "Acquire::Check-Valid-Until \"false\";" > /etc/apt/apt.conf
+# RUN echo "deb http://mirrors.tencentyun.com/debian buster main" > /etc/apt/sources.list
+# RUN echo "deb http://mirrors.tencentyun.com/debian-security buster/updates main" >> /etc/apt/sources.list
+# RUN echo "deb http://mirrors.tencentyun.com/debian buster-updates main" >> /etc/apt/sources.list
 
-ENV SUPERVISOR_VERSION 3.3.0
-
-RUN buildDeps='curl gcc libc6-dev libpcre3-dev libssl-dev make libreadline-dev zlib1g-dev' \
+RUN buildDeps='cron wget python python-setuptools gcc make perl dnsmasq libc6-dev libpcre3-dev zlib1g-dev socat certbot' \
     && set -x \
-    && apt-get update && apt-get install --no-install-recommends -yqq $buildDeps \
-    cron \
-	perl \
-    wget \
-    ca-certificates \
-    curl \
-    patch \
-    python-setuptools \
-    dnsmasq \
-    libssl1.0.0 libpcre3 \
-    python-ndg-httpsclient \
-    && apt-get install --no-install-recommends -yqq certbot -t jessie-backports \
-    && wget https://github.com/Supervisor/supervisor/archive/${SUPERVISOR_VERSION}.tar.gz \
-    && tar -xvf ${SUPERVISOR_VERSION}.tar.gz \
-    && cd supervisor-${SUPERVISOR_VERSION} && python setup.py install \
+    && apt-get update && apt-get install --no-install-recommends -yqq $buildDeps
+
+ENV SUPERVISOR_VERSION 4.2.1
+
+RUN wget https://github.com/Supervisor/supervisor/archive/${SUPERVISOR_VERSION}.tar.gz -O supervisor-4.2.1.tar.gz \
+    && tar -zxvf supervisor-${SUPERVISOR_VERSION}.tar.gz \
+	&& rm supervisor-${SUPERVISOR_VERSION}.tar.gz \
+    && cd supervisor-${SUPERVISOR_VERSION} \
+	&& python setup.py install \
     && apt-get clean autoclean && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/*
-	
-RUN cd /usr/local/bin && wget https://dl.eff.org/certbot-auto \
-	&& chmod 755 /usr/local/bin/certbot-auto
-	
-RUN ["/bin/bash","-c","echo -e 'Y\n' | /usr/local/bin/certbot-auto --os-packages-only"]
-RUN ["/bin/bash","-c","echo -e 'Y\n' | /usr/local/bin/certbot-auto --install-only"]
-	
-ENV LUA_VERSION 5.3.0
-ENV LUA_VERSION_SHORT 53
+		
+ENV LUA_VERSION 5.4.2
 
-RUN cd /usr/src \
-    && curl -R -O http://www.lua.org/ftp/lua-${LUA_VERSION}.tar.gz \
-    && tar zxf lua-${LUA_VERSION}.tar.gz \
+RUN wget http://www.lua.org/ftp/lua-${LUA_VERSION}.tar.gz \
+    && tar -zxvf lua-${LUA_VERSION}.tar.gz \
     && rm lua-${LUA_VERSION}.tar.gz \
     && cd lua-${LUA_VERSION} \
     && make linux \
-    && make INSTALL_TOP=/opt/lua${LUA_VERSION_SHORT} install
+    && make INSTALL_TOP=/opt/lua install
 
-ENV HAPROXY_MAJOR 2.2
-ENV HAPROXY_VERSION 2.2.2
-ENV HAPROXY_MD5 dfef423ff9f191c401d6b29e7eb9d6e2
-
-RUN cd /root && wget https://github.com/openssl/openssl/archive/OpenSSL_1_1_0l.tar.gz \
+RUN wget https://github.com/openssl/openssl/archive/OpenSSL_1_1_0l.tar.gz \
 	&& tar -zxvf OpenSSL_1_1_0l.tar.gz \
+	&& rm OpenSSL_1_1_0l.tar.gz \
 	&& cd openssl-OpenSSL_1_1_0l \
 	&& ./config shared zlib --prefix=/usr/local/openssl-1.1.0 --openssldir=/usr/local/openssl-1.1.0/ssl \
 	&& make && make install \
 	&& cp /usr/local/openssl-1.1.0/lib/libssl.so.1.1 /lib/x86_64-linux-gnu \
 	&& cp /usr/local/openssl-1.1.0/lib/libcrypto.so.1.1 /lib/x86_64-linux-gnu
+	
+ENV HAPROXY_MAJOR 2.3
+ENV HAPROXY_VERSION 2.3.2
+ENV HAPROXY_MD5 3b1143f2e38dbbb41cfa0996666c971c
 
-
-RUN cd / && curl -SL "http://www.haproxy.org/download/${HAPROXY_MAJOR}/src/haproxy-${HAPROXY_VERSION}.tar.gz" -o haproxy.tar.gz \
-	&& echo "${HAPROXY_MD5}  haproxy.tar.gz" | md5sum -c \
+RUN wget http://www.haproxy.org/download/${HAPROXY_MAJOR}/src/haproxy-${HAPROXY_VERSION}.tar.gz \
+	&& echo "${HAPROXY_MD5} haproxy-${HAPROXY_VERSION}.tar.gz" | md5sum -c \
 	&& mkdir -p /usr/src/haproxy \
-	&& tar -xzf haproxy.tar.gz -C /usr/src/haproxy --strip-components=1 \
-	&& rm haproxy.tar.gz \
+	&& tar -zxvf haproxy-${HAPROXY_VERSION}.tar.gz -C /usr/src/haproxy --strip-components=1 \
+	&& rm haproxy-${HAPROXY_VERSION}.tar.gz \
 	&& make -C /usr/src/haproxy \
 		TARGET=linux-glibc \
 		ARCH=x86_64 \
@@ -69,16 +54,13 @@ RUN cd / && curl -SL "http://www.haproxy.org/download/${HAPROXY_MAJOR}/src/hapro
 		SSL_LIB=/usr/local/openssl-1.1.0/lib \
 		SSL_INC=/usr/local/openssl-1.1.0/include \
 		USE_ZLIB=1 \
-		USE_LUA=yes LUA_LIB=/opt/lua53/lib/ \
-        	LUA_INC=/opt/lua53/include/ LDFLAGS=-ldl \
+		USE_LUA=yes LUA_LIB=/opt/lua/lib/ \
+        	LUA_INC=/opt/lua/include/ LDFLAGS=-ldl \
 		all \
 		install-bin \
 	&& mkdir -p /usr/local/etc/haproxy \
 	&& cp -R /usr/src/haproxy/examples/errorfiles /usr/local/etc/haproxy/errors \
-	&& rm -rf /usr/src/haproxy \
-    && apt-get -y update \
-    && apt-get -y install socat \
-    && apt-get -y autoremove
+	&& rm -rf /usr/src/haproxy
 
 COPY docker-entrypoint.sh /
 
