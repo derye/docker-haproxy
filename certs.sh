@@ -6,12 +6,12 @@ if [ -n "$CERTS" ]; then
         -d "$CERTS" --keep --expand --agree-tos --email "$EMAIL" \
 		--server "$URL" \
         || exit 1
-
+	
+	if [ -f "/etc/letsencrypt/live/README" ]; then
+		rm -f /etc/letsencrypt/live/README
+	fi
     mkdir -p /usr/local/etc/haproxy/certs
     for site in `ls -1 /etc/letsencrypt/live`; do
-		if ["$site" = "README"]; then
-			continue
-		fi
         cat /etc/letsencrypt/live/$site/fullchain.pem \
 		/etc/letsencrypt/live/$site/privkey.pem \
           | tee /usr/local/etc/haproxy/certs/haproxy-"$site".pem >/dev/null

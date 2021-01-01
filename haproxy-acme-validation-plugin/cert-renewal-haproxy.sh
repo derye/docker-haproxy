@@ -87,10 +87,10 @@ while IFS= read -r -d '' cert; do
 done < <(find ${le_cert_root} -name cert.pem -print0)
 
 # create haproxy.pem file(s)
+if [ -f "/etc/letsencrypt/live/README" ]; then
+	rm -f /etc/letsencrypt/live/README
+fi
 for domain in ${renewed_certs[@]}; do
-  if ["$domain" = "README"]; then
-    continue
-  fi
   cat ${le_cert_root}/${domain}/fullchain.pem ${le_cert_root}/${domain}/privkey.pem | tee /usr/local/etc/haproxy/certs/haproxy-${domain}.pem >/dev/null
   if [ $? -ne 0 ]; then
     logger_error "failed to create haproxy.pem file!"
