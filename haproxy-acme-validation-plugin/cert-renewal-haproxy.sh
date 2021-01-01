@@ -88,7 +88,10 @@ done < <(find ${le_cert_root} -name cert.pem -print0)
 
 # create haproxy.pem file(s)
 for domain in ${renewed_certs[@]}; do
-  cat ${le_cert_root}/${domain}/privkey.pem ${le_cert_root}/${domain}/fullchain.pem | tee /usr/local/etc/haproxy/certs/haproxy-${domain}.pem >/dev/null
+  if ["$domain" = "README"]; then
+    continue
+  fi
+  cat ${le_cert_root}/${domain}/fullchain.pem ${le_cert_root}/${domain}/privkey.pem | tee /usr/local/etc/haproxy/certs/haproxy-${domain}.pem >/dev/null
   if [ $? -ne 0 ]; then
     logger_error "failed to create haproxy.pem file!"
     exit 1

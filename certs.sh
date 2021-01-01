@@ -9,6 +9,9 @@ if [ -n "$CERTS" ]; then
 
     mkdir -p /usr/local/etc/haproxy/certs
     for site in `ls -1 /etc/letsencrypt/live`; do
+		if ["$site" = "README"]; then
+			continue
+		fi
         cat /etc/letsencrypt/live/$site/fullchain.pem \
 		/etc/letsencrypt/live/$site/privkey.pem \
           | tee /usr/local/etc/haproxy/certs/haproxy-"$site".pem >/dev/null
