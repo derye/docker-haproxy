@@ -1,7 +1,8 @@
 # Dockerized HAProxy with Let's Encrypt
 
-This container provides a HAProxy 1.7 application with Let's Encrypt certificates
+This container provides a HAProxy 2.3 application with Let's Encrypt certificates(or any acme SSL cert service)
 generated at startup, as well as renewed (if necessary) once a week.
+support HTTP2
 
 ## Usage
 
@@ -9,6 +10,7 @@ generated at startup, as well as renewed (if necessary) once a week.
 docker run \
     -e CERTS=my.domain,my.other.domain \
     -e EMAIL=my.email@my.domain \
+    -e URL=https://acme-v02.api.letsencrypt.org/directory \
     -v /etc/letsencrypt:/etc/letsencrypt \
     -p 80:80 -p 443:443 \
     bradjonesllc/docker-haproxy-letsencrypt
