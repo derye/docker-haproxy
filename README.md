@@ -2,7 +2,9 @@
 
 This container provides a HAProxy 2.3 application with Let's Encrypt certificates(or any ACME SSL certificate service)
 generated at startup, as well as renewed (if necessary) once a week.
+
 Support HTTP2.
+
 Support ACME V2.
 
 ## Usage
